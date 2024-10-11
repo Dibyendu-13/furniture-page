@@ -7,7 +7,25 @@ const App = () => {
   const iframeRef = useRef(null);
 
   const handleShowIframe = () => {
-    setShowIframe(!showIframe); // Toggle the iframe visibility
+    requestMicrophoneAccess(); // Request microphone access
+    setShowIframe(true); // Show the iframe
+  };
+
+  // Request microphone access
+  const requestMicrophoneAccess = async () => {
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log('Microphone access granted');
+      // Optionally send a message to the iframe to start voice recognition
+      if (iframeRef.current) {
+        const iframeWindow = iframeRef.current.contentWindow;
+        if (iframeWindow) {
+          iframeWindow.postMessage("Start voice recognition", '*');
+        }
+      }
+    } catch (error) {
+      console.error('Error accessing microphone:', error);
+    }
   };
 
   // Close the iframe when clicking outside of it
@@ -31,6 +49,23 @@ const App = () => {
     };
   }, [showIframe]);
 
+  // Handle messages from the iframe
+  useEffect(() => {
+    const handleMessage = (event) => {
+      // Check the origin of the message for security
+      if (event.origin !== 'https://vapi.ai') {
+        return;
+      }
+      console.log('Message from iframe:', event.data);
+    };
+
+    window.addEventListener('message', handleMessage);
+    
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, []);
+
   return (
     <div className="app">
       <header className="header">
@@ -52,16 +87,23 @@ const App = () => {
 
         {/* Iframe popup */}
         {showIframe && (
-          <div
-            className="iframe-popup"
-            ref={iframeRef} // Attach the ref to the iframe container
-          >
+          <div className="iframe-popup" ref={iframeRef}>
             <iframe
               title="Furniture Details"
               style={{ width: '100%', height: '100%', border: 'none' }}
-              src="https://vapi.ai?demo=true&shareKey=fe502c7f-d3a8-46bf-a2d8-aea6eb0d1ea0&assistantId=dd812e24-c416-4d87-9427-d615d4e6ea2a"
+              allow="microphone"
+              src="https://vapi.ai?demo=true&shareKey=fa00851b-217c-40ad-bb83-06eebe97910a&assistantId=8c191741-8543-464c-abf2-d820fe6f785d"
               frameBorder="0"
               allowFullScreen
+              onLoad={() => {
+                // Optionally send a message to the iframe to start voice recognition
+                if (showIframe) {
+                  const iframeWindow = iframeRef.current.contentWindow;
+                  if (iframeWindow) {
+                    iframeWindow.postMessage("Start voice recognition", '*');
+                  }
+                }
+              }}
             ></iframe>
           </div>
         )}
