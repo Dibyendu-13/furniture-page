@@ -77,8 +77,9 @@ const App = () => {
         <div className="furniture-display">
           <img src={sofaImage} alt="Castlery Sofa" className="furniture-image" />
           <div className="furniture-info">
-            <h2>Elegant Castlery Sofa</h2>
-            <p>A blend of style and comfort from Castlery, perfect for your living room.</p>
+            <h2> Elegant Furniture Collection</h2>
+           
+            <p>A blend of style and comfort from Castlery, ⁠⁠Perfect for your home .</p>
             <button className="view-3d-btn" onClick={handleShowIframe}>
               Call Sales
             </button>
